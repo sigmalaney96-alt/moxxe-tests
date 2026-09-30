@@ -6,7 +6,13 @@ import { signOut } from 'firebase/auth';
 import { getTeacherCookie, generateSessionCode, isTeacherLoggedIn, removeTeacherCookie } from '../lib/sessionUtils';
 import styles from '../styles/Dashboard.module.css';
 
-const TESTING_PLATFORMS = ['Kahoot', 'Cambium Assessment', 'Pear Deck'];
+const TESTING_PLATFORMS = [
+  { name: 'Kahoot', url: 'https://kahoot.it' },
+  { name: 'Cambium Assessment', url: 'https://mobile.tds.cambiumast.com/launchpad' },
+  { name: 'Pear Assessment', url: 'https://app.peardeck.com/join' }
+];
+
+const generateAccessCode = () => String(Math.floor(100 + Math.random() * 900));
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -63,12 +69,14 @@ export default function TeacherDashboard() {
       const cookie = getTeacherCookie();
       await push(ref(database, `teachers/${cookie.uid}/sessions`), {
         name: sessionName.trim(),
-        platforms: selectedPlatforms,
-        platform: selectedPlatforms[0],
+        platforms: selectedPlatforms.map((platform) => platform.name),
+        platform: selectedPlatforms[0].name,
+        platformUrls: Object.fromEntries(selectedPlatforms.map((platform) => [platform.name, platform.url])),
         code: generateSessionCode(),
+        accessCode: generateAccessCode(),
         createdAt: new Date().toISOString(),
-        status: 'active',
-        sessionStarted: true,
+        status: 'ready',
+        sessionStarted: false,
         paused: false,
         students: {}
       });
@@ -116,15 +124,15 @@ export default function TeacherDashboard() {
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <div><h2>Current sessions</h2><p>Start a session and share its code with your students.</p></div>
-            <button onClick={() => setShowCreateModal(true)} className={styles.primaryBtn}>Start new session</button>
+            <button onClick={() => setShowCreateModal(true)} className={styles.primaryBtn}>Create session</button>
           </div>
           {sessions.length === 0 ? <p className={styles.empty}>No sessions yet. Start one to get your class connected.</p> : <div className={styles.sessionGrid}>{sessions.map((session) => { const isClosed = session.status === 'closed'; const isStarted = session.sessionStarted !== false && !isClosed; return <article key={session.id} className={`${styles.sessionCard} ${isClosed ? styles.closed : ''}`}><button type="button" className={styles.cardBody} onClick={() => setSelectedSession(session)}><h3>{session.name}</h3><p className={styles.platform}>{(session.platforms || [session.platform]).join(' · ')}</p><p className={styles.code}>Code: <strong>{session.code}</strong></p><p className={styles.status}>{isClosed ? 'Closed' : session.paused ? 'Paused' : isStarted ? 'Live' : 'Ready to start'}</p><p className={styles.studentCount}>{Object.keys(session.students || {}).length} students</p></button>{!isClosed && <button type="button" className={styles.primaryBtn} onClick={() => handleStartSession(session)}>{isStarted ? 'Manage session' : 'Start session'}</button>}</article>; })}</div>}
         </div>
       </main>
 
-      {showCreateModal && <div className={styles.modal}><form className={styles.modalContent} onSubmit={handleCreateSession}><h2>Start a new session</h2><label>Session name<input autoFocus value={sessionName} onChange={(event) => setSessionName(event.target.value)} className={styles.input} placeholder="Period 2 math review" required /></label><fieldset><legend>Choose testing tools</legend>{TESTING_PLATFORMS.map((platform) => <label key={platform} className={styles.checkbox}><input type="checkbox" checked={selectedPlatforms.includes(platform)} onChange={() => togglePlatform(platform)} />{platform}</label>)}</fieldset><div className={styles.modalButtons}><button type="submit" disabled={loading || selectedPlatforms.length === 0} className={styles.primaryBtn}>{loading ? 'Starting...' : 'Start session'}</button><button type="button" onClick={() => setShowCreateModal(false)} className={styles.secondaryBtn}>Cancel</button></div></form></div>}
+      {showCreateModal && <div className={styles.modal}><form className={styles.modalContent} onSubmit={handleCreateSession}><h2>Create a new session</h2><label>Session name<input autoFocus value={sessionName} onChange={(event) => setSessionName(event.target.value)} className={styles.input} placeholder="Period 2 math review" required /></label><fieldset><legend>Choose testing tools</legend>{TESTING_PLATFORMS.map((platform) => <label key={platform.name} className={styles.checkbox}><input type="checkbox" checked={selectedPlatforms.includes(platform)} onChange={() => togglePlatform(platform)} />{platform.name}</label>)}</fieldset><div className={styles.modalButtons}><button type="submit" disabled={loading || selectedPlatforms.length === 0} className={styles.primaryBtn}>{loading ? 'Starting...' : 'Start session'}</button><button type="button" onClick={() => setShowCreateModal(false)} className={styles.secondaryBtn}>Cancel</button></div></form></div>}
 
-      {selectedSession && <div className={styles.modal}><section className={styles.sessionControlPanel}><button className={styles.closeBtn} onClick={() => setSelectedSession(null)} aria-label="Close session controls">×</button><h2>{selectedSession.name}</h2><p>Share this code with students</p><div className={styles.code}>{selectedSession.code}</div><div className={styles.controlButtons}>{sessionPaused ? <button onClick={() => updateSelectedSession({ paused: false })} className={styles.resumeBtn}>Resume all</button> : <button onClick={() => updateSelectedSession({ paused: true })} className={styles.pauseBtn}>Pause all</button>}<button onClick={handleStopSession} className={styles.stopBtn}>Stop session</button></div><div className={styles.studentList}><h3>Students in session ({sessionStudents.length})</h3>{sessionStudents.length === 0 ? <p className={styles.empty}>Students will appear here after they join.</p> : sessionStudents.map((student) => <div key={student.id} className={styles.studentItem}><span>{student.name}</span><button onClick={() => update(ref(database, `teachers/${getTeacherCookie().uid}/sessions/${selectedSession.id}/students/${student.id}`), { paused: !student.paused })} className={styles.pauseStudentBtn}>{student.paused ? 'Resume' : 'Pause'}</button></div>)}</div></section></div>}
+      {selectedSession && <div className={styles.modal}><section className={styles.sessionControlPanel}><button className={styles.closeBtn} onClick={() => setSelectedSession(null)} aria-label="Close session controls">×</button><h2>{selectedSession.name}</h2><p>Share this code with students</p><div className={styles.code}>{selectedSession.code}</div><p>Teacher access code</p><div className={styles.code}>{selectedSession.accessCode || 'Set on session creation'}</div><div className={styles.controlButtons}>{sessionPaused ? <button onClick={() => updateSelectedSession({ paused: false })} className={styles.resumeBtn}>Resume all</button> : <button onClick={() => updateSelectedSession({ paused: true })} className={styles.pauseBtn}>Pause all</button>}<button onClick={handleStopSession} className={styles.stopBtn}>Stop session</button></div><div className={styles.studentList}><h3>Students in session ({sessionStudents.length})</h3>{sessionStudents.length === 0 ? <p className={styles.empty}>Students will appear here after they join.</p> : sessionStudents.map((student) => <div key={student.id} className={styles.studentItem}><span>{student.name}</span><button onClick={() => update(ref(database, `teachers/${getTeacherCookie().uid}/sessions/${selectedSession.id}/students/${student.id}`), { paused: !student.paused })} className={styles.pauseStudentBtn}>{student.paused ? 'Resume' : 'Pause'}</button></div>)}</div></section></div>}
     </div>
   );
 }

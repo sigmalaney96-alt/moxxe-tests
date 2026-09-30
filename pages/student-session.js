@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { database } from '../lib/firebase';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, get, onValue, update } from 'firebase/database';
 import styles from '../styles/StudentSession.module.css';
 
 export default function StudentSession() {
@@ -17,6 +17,9 @@ export default function StudentSession() {
   const [fullscreen, setFullscreen] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [canDraw, setCanDraw] = useState(true);
+  const [fullscreenViolation, setFullscreenViolation] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
+  const [accessError, setAccessError] = useState('');
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -26,8 +29,9 @@ export default function StudentSession() {
     const unsubscribe = onValue(sessionRef, (snapshot) => {
       if (snapshot.exists()) {
         const session = snapshot.val();
-        setSessionStarted(session.sessionStarted || false);
+        setSessionStarted(Boolean(session.sessionStarted));
         setSessionPaused(Boolean(session.paused));
+        setTestUrl(session.platformUrls?.[session.platforms?.[0] || session.platform] || 'about:blank');
 
         if (session.status === 'closed') {
           setSessionClosed(true);
@@ -45,11 +49,32 @@ export default function StudentSession() {
       }
     });
 
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && sessionStarted) setFullscreenViolation(true);
+      setFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
     return () => {
       unsubscribe();
       studentUnsubscribe();
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [router.isReady, teacherId, sessionId, studentId]);
+  }, [router.isReady, teacherId, sessionId, studentId, sessionStarted]);
+
+  const handleAccessCodeSubmit = (event) => {
+    event.preventDefault();
+    setAccessError('');
+    get(ref(database, `teachers/${teacherId}/sessions/${sessionId}`)).then((snapshot) => {
+      if (snapshot.val()?.accessCode === accessCode) {
+        setFullscreenViolation(false);
+        setAccessCode('');
+        handleEnterFullscreen();
+      } else {
+        setAccessError('That access code is incorrect.');
+      }
+    });
+  };
 
   const showSessionClosedMessage = () => {
     alert('This session has been closed. Please close the tab.');
@@ -120,6 +145,23 @@ export default function StudentSession() {
     return <div className={styles.pauseOverlay}><div className={styles.pauseMessage}><h2>This session has closed</h2><p>Please close this tab.</p></div></div>;
   }
 
+  if (fullscreenViolation) {
+    return (
+      <div className={styles.pauseOverlay}>
+        <div className={styles.pauseMessage}>
+          <h2>You&apos;ve been caught</h2>
+          <p>You left fullscreen. Ask your teacher for the 3-digit access code to resume your test.</p>
+          <form onSubmit={handleAccessCodeSubmit} className={styles.accessForm}>
+            <label className="sr-only" htmlFor="access-code">Teacher access code</label>
+            <input id="access-code" inputMode="numeric" pattern="[0-9]{3}" maxLength="3" value={accessCode} onChange={(event) => setAccessCode(event.target.value.replace(/\\D/g, '').slice(0, 3))} className={styles.accessInput} placeholder="000" required />
+            <button type="submit" className={styles.accessButton}>Resume</button>
+          </form>
+          {accessError && <p className={styles.accessError}>{accessError}</p>}
+        </div>
+      </div>
+    );
+  }
+
   if (sessionPaused || studentPaused) {
     return (
       <div className={styles.pauseOverlay}>
@@ -142,10 +184,10 @@ export default function StudentSession() {
             <canvas
               ref={canvasRef}
               className={styles.canvas}
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
+              onPointerDown={startDrawing}
+              onPointerMove={draw}
+              onPointerUp={stopDrawing}
+              onPointerLeave={stopDrawing}
               style={{ cursor: canDraw ? 'crosshair' : 'not-allowed' }}
             />
             <button onClick={clearCanvas} className={styles.clearBtn}>
