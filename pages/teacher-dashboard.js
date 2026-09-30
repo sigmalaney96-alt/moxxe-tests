@@ -86,6 +86,15 @@ export default function TeacherDashboard() {
     return update(ref(database, `teachers/${cookie.uid}/sessions/${selectedSession.id}`), changes);
   };
 
+  const handleStartSession = async (session) => {
+    await update(ref(database, `teachers/${getTeacherCookie().uid}/sessions/${session.id}`), {
+      status: 'active',
+      sessionStarted: true,
+      paused: false
+    });
+    setSelectedSession(session);
+  };
+
   const handleStopSession = async () => {
     await updateSelectedSession({ status: 'closed', sessionStarted: false, paused: false });
     setSelectedSession(null);
@@ -109,7 +118,7 @@ export default function TeacherDashboard() {
             <div><h2>Current sessions</h2><p>Start a session and share its code with your students.</p></div>
             <button onClick={() => setShowCreateModal(true)} className={styles.primaryBtn}>Start new session</button>
           </div>
-          {sessions.length === 0 ? <p className={styles.empty}>No sessions yet. Start one to get your class connected.</p> : <div className={styles.sessionGrid}>{sessions.map((session) => <button key={session.id} type="button" className={`${styles.sessionCard} ${session.status === 'closed' ? styles.closed : ''}`} onClick={() => setSelectedSession(session)}><h3>{session.name}</h3><p className={styles.platform}>{(session.platforms || [session.platform]).join(' · ')}</p><p className={styles.code}>Code: <strong>{session.code}</strong></p><p className={styles.status}>{session.status === 'closed' ? 'Closed' : session.paused ? 'Paused' : 'Live'}</p><p className={styles.studentCount}>{Object.keys(session.students || {}).length} students</p></button>)}</div>}
+          {sessions.length === 0 ? <p className={styles.empty}>No sessions yet. Start one to get your class connected.</p> : <div className={styles.sessionGrid}>{sessions.map((session) => { const isClosed = session.status === 'closed'; const isStarted = session.sessionStarted !== false && !isClosed; return <article key={session.id} className={`${styles.sessionCard} ${isClosed ? styles.closed : ''}`}><button type="button" className={styles.cardBody} onClick={() => setSelectedSession(session)}><h3>{session.name}</h3><p className={styles.platform}>{(session.platforms || [session.platform]).join(' · ')}</p><p className={styles.code}>Code: <strong>{session.code}</strong></p><p className={styles.status}>{isClosed ? 'Closed' : session.paused ? 'Paused' : isStarted ? 'Live' : 'Ready to start'}</p><p className={styles.studentCount}>{Object.keys(session.students || {}).length} students</p></button>{!isClosed && <button type="button" className={styles.primaryBtn} onClick={() => handleStartSession(session)}>{isStarted ? 'Manage session' : 'Start session'}</button>}</article>; })}</div>}
         </div>
       </main>
 
