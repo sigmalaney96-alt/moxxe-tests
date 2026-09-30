@@ -1,0 +1,178 @@
+.container {
+  min-height: 100vh;
+  background: #1a202c;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: #2d3748;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.fullscreenBtn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.fullscreenBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.waitingArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.waitingArea h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.waitingArea p {
+  font-size: 1.1rem;
+  color: #cbd5e0;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.drawingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.canvas {
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  background: white;
+  cursor: crosshair;
+  width: 100%;
+  height: 400px;
+  max-width: 600px;
+}
+
+.clearBtn {
+  padding: 10px 30px;
+  background-color: #ed8936;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.clearBtn:hover {
+  background-color: #dd6b20;
+}
+
+.pauseOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.pauseMessage {
+  background: white;
+  color: #2d3748;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pauseMessage h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.8rem;
+  color: #ed8936;
+}
+
+.pauseMessage p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #4a5568;
+}
+
+.fullscreenOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: black;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.exitFullscreenBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #f56565;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  z-index: 1002;
+}
+
+.exitFullscreenBtn:hover {
+  background-color: #e53e3e;
+}
+
+.testContainer {
+  flex: 1;
+  padding: 30px;
+  text-align: center;
+}
+
+.testContainer p {
+  font-size: 1.1rem;
+  color: #cbd5e0;
+}

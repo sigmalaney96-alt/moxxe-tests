@@ -1,0 +1,35 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.message {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.message h1 {
+  color: #f56565;
+  font-size: 2rem;
+  margin: 0 0 15px 0;
+}
+
+.message p {
+  color: #4a5568;
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.instruction {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1.2rem;
+}
