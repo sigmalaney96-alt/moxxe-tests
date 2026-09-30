@@ -63,6 +63,16 @@
   color: #667eea;
 }
 
+.teacher {
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.teacher:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
 .secondaryBtn:hover {
   background-color: #f0f0f0;
   transform: translateY(-2px);
