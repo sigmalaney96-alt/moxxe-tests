@@ -223,9 +223,6 @@ export default function StudentSession() {
             allowFullScreen
           />
           <div className={styles.testActions}>
-            <a href={testUrl} target="_blank" rel="noopener noreferrer" className={styles.openTestBtn}>
-              Open test in new tab
-            </a>
             <button onClick={handleExitFullscreen} className={styles.exitFullscreenBtn}>
               Exit fullscreen
             </button>
@@ -235,7 +232,7 @@ export default function StudentSession() {
         <div className={styles.testContainer}>
           <p>Your assigned test is ready.</p>
           <button onClick={handleEnterFullscreen} className={styles.fullscreenBtn}>Open assigned test</button>
-          {testUrl !== 'about:blank' && <a href={testUrl} target="_blank" rel="noopener noreferrer" className={styles.openTestBtn}>Open in new tab</a>}
+
         </div>
       )}
     </div>
