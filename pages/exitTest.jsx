@@ -1,26 +1,21 @@
-import Link from 'next/link';
 import styles from '../styles/ExitTest.module.css';
 
 export default function ExitTest() {
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <div className={styles.warningBox}>
-          <h1 className={styles.title}>⚠️ Test Paused</h1>
-          <p className={styles.message}>
-            You have exited the secure testing window. Your test has been paused.
-          </p>
-          <p className={styles.submessage}>
-            For security purposes, please contact your instructor to resume your test.
-          </p>
-        </div>
+    <div className={styles.page}>
+      <header className={styles.topBar}>
+        <div className={styles.brand}>Moxee</div>
+      </header>
 
-        <div className={styles.buttonContainer}>
-          <Link href="/">
-            <button className={styles.button}>Return to Home</button>
-          </Link>
-        </div>
-      </div>
+      <section className={styles.hero}>
+        <h1 className={styles.heading}>You have exited the<br />test session</h1>
+      </section>
+
+      <section className={styles.infoPanel}>
+        <p className={styles.infoText}>
+          Hi You have exited the Test Session with Moxee, If you accidentally pressed escape or F11 please go tell a teacher to help you reconnect!
+        </p>
+      </section>
     </div>
   );
 }
