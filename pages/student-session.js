@@ -11,6 +11,8 @@ export default function StudentSession() {
   
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionPaused, setSessionPaused] = useState(false);
+  const [studentPaused, setStudentPaused] = useState(false);
+  const [sessionClosed, setSessionClosed] = useState(false);
   const [testUrl, setTestUrl] = useState('');
   const [fullscreen, setFullscreen] = useState(false);
   const [drawing, setDrawing] = useState(false);
@@ -25,10 +27,10 @@ export default function StudentSession() {
       if (snapshot.exists()) {
         const session = snapshot.val();
         setSessionStarted(session.sessionStarted || false);
-        setSessionPaused(session.paused || false);
+        setSessionPaused(Boolean(session.paused));
 
         if (session.status === 'closed') {
-          showSessionClosedMessage();
+          setSessionClosed(true);
         }
       }
     });
@@ -38,7 +40,7 @@ export default function StudentSession() {
     const studentUnsubscribe = onValue(studentRef, (snapshot) => {
       if (snapshot.exists()) {
         const student = snapshot.val();
-        setSessionPaused(student.paused || false);
+        setStudentPaused(Boolean(student.paused));
         setCanDraw(student.canDraw !== false);
       }
     });
@@ -114,7 +116,11 @@ export default function StudentSession() {
     return <div className={styles.container}>Loading...</div>;
   }
 
-  if (sessionPaused) {
+  if (sessionClosed) {
+    return <div className={styles.pauseOverlay}><div className={styles.pauseMessage}><h2>This session has closed</h2><p>Please close this tab.</p></div></div>;
+  }
+
+  if (sessionPaused || studentPaused) {
     return (
       <div className={styles.pauseOverlay}>
         <div className={styles.pauseMessage}>

@@ -9,10 +9,14 @@ export default function Home() {
         <p className={styles.subtitle}>Secure Testing Made Simple</p>
         
         <div className={styles.buttonContainer}>
-          <Link href="/test">
+          <Link href="/student-login">
             <button className={styles.button}>Student Log-in</button>
           </Link>
-          
+
+          <Link href="/teacher-dashboard">
+            <button className={styles.button + ' ' + styles.teacher}>Teacher Mode</button>
+          </Link>
+
           <Link href="/about">
             <button className={styles.button + ' ' + styles.secondary}>About</button>
           </Link>

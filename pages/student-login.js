@@ -106,7 +106,7 @@ export default function StudentLogin() {
             <label>Session Code</label>
             <input
               type="text"
-              placeholder="Enter 6-digit code"
+              placeholder="Enter 6-character code"
               value={sessionCode}
               onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
               maxLength="6"
