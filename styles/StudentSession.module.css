@@ -179,10 +179,34 @@
   border: none;
 }
 
-.exitFullscreenBtn {
+.testActions {
   position: absolute;
   top: 20px;
   right: 20px;
+  z-index: 1002;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.openTestBtn {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #667eea;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.testContainer .openTestBtn {
+  margin-left: 10px;
+}
+
+.exitFullscreenBtn {
+  position: relative;
+  top: auto;
+  right: auto;
   padding: 10px 20px;
   background-color: #f56565;
   color: white;

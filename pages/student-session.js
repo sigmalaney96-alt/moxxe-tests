@@ -31,7 +31,9 @@ export default function StudentSession() {
         const session = snapshot.val();
         setSessionStarted(Boolean(session.sessionStarted));
         setSessionPaused(Boolean(session.paused));
-        setTestUrl(session.platformUrls?.[session.platforms?.[0] || session.platform] || 'about:blank');
+        const assignedPlatform = session.platforms?.[0] || session.platform;
+        const assignedUrl = session.platformUrls?.[assignedPlatform] || session.testUrl || '';
+        setTestUrl(assignedUrl ? (assignedUrl.startsWith('http') ? assignedUrl : `https://${assignedUrl}`) : 'about:blank');
 
         if (session.status === 'closed') {
           setSessionClosed(true);
@@ -81,10 +83,14 @@ export default function StudentSession() {
   };
 
   const handleEnterFullscreen = async () => {
+    setFullscreen(true);
     const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      await elem.requestFullscreen();
-      setFullscreen(true);
+    if (!document.fullscreenElement && elem.requestFullscreen) {
+      try {
+        await elem.requestFullscreen();
+      } catch (error) {
+        // Browsers can reject fullscreen while embedded; the assigned test remains usable.
+      }
     }
   };
 
@@ -208,26 +214,30 @@ export default function StudentSession() {
         </button>
       </div>
 
-      {fullscreen && (
+      {fullscreen ? (
         <div className={styles.fullscreenOverlay}>
           <iframe
-            src={testUrl || 'about:blank'}
+            src={testUrl}
             className={styles.iframe}
-            title="Testing Platform"
+            title="Assigned testing platform"
             allowFullScreen
           />
-          <button 
-            onClick={handleExitFullscreen}
-            className={styles.exitFullscreenBtn}
-          >
-            Exit Fullscreen
-          </button>
+          <div className={styles.testActions}>
+            <a href={testUrl} target="_blank" rel="noopener noreferrer" className={styles.openTestBtn}>
+              Open test in new tab
+            </a>
+            <button onClick={handleExitFullscreen} className={styles.exitFullscreenBtn}>
+              Exit fullscreen
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.testContainer}>
+          <p>Your assigned test is ready.</p>
+          <button onClick={handleEnterFullscreen} className={styles.fullscreenBtn}>Open assigned test</button>
+          {testUrl !== 'about:blank' && <a href={testUrl} target="_blank" rel="noopener noreferrer" className={styles.openTestBtn}>Open in new tab</a>}
         </div>
       )}
-
-      <div className={styles.testContainer}>
-        <p>Fullscreen mode is recommended for tests. Click the button above to start.</p>
-      </div>
     </div>
   );
 }
