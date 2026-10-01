@@ -18,6 +18,8 @@ export default function StudentSession() {
   const [drawing, setDrawing] = useState(false);
   const [canDraw, setCanDraw] = useState(true);
   const [fullscreenViolation, setFullscreenViolation] = useState(false);
+  const [studentTestStarted, setStudentTestStarted] = useState(false);
+  const studentTestStartedRef = useRef(false);
   const [accessCode, setAccessCode] = useState('');
   const [accessError, setAccessError] = useState('');
 
@@ -55,7 +57,7 @@ export default function StudentSession() {
     });
 
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && sessionStarted) setFullscreenViolation(true);
+      if (!document.fullscreenElement && sessionStarted && studentTestStartedRef.current) setFullscreenViolation(true);
       setFullscreen(Boolean(document.fullscreenElement));
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -83,6 +85,13 @@ export default function StudentSession() {
 
   const showSessionClosedMessage = () => {
     alert('This session has been closed. Please close the tab.');
+  };
+
+  const handleStartTest = async () => {
+    studentTestStartedRef.current = true;
+    setStudentTestStarted(true);
+    setFullscreenViolation(false);
+    await handleEnterFullscreen();
   };
 
   const handleEnterFullscreen = async () => {
@@ -209,7 +218,9 @@ export default function StudentSession() {
 
       <div className={styles.testContainer}>
         <p>Your assigned test is ready.</p>
-        <button onClick={handleEnterFullscreen} className={styles.fullscreenBtn}>Open assigned test</button>
+        {!studentTestStarted && (
+          <button onClick={handleStartTest} className={styles.fullscreenBtn}>Start Test</button>
+        )}
       </div>
       <div className={styles.fullscreenOverlay}>
         <iframe
@@ -225,14 +236,15 @@ export default function StudentSession() {
             Exit fullscreen
           </button>
         </div>
-        {(!fullscreen || fullscreenViolation || sessionPaused || studentPaused) && (
+        {(fullscreenViolation || sessionPaused || studentPaused || !studentTestStarted) && (
           <div className={styles.iframeLockOverlay} role="dialog" aria-modal="true">
-            {fullscreenViolation ? lockedMessage : !fullscreen ? (
+            {fullscreenViolation || sessionPaused || studentPaused ? lockedMessage : (
               <div className={styles.pauseMessage}>
                 <h2>Your assigned test is ready</h2>
-                <p>Select Open assigned test to begin.</p>
+                <p>Select Start Test to enter fullscreen and begin.</p>
+                <button onClick={handleStartTest} className={styles.fullscreenBtn}>Start Test</button>
               </div>
-            ) : lockedMessage}
+            )}
           </div>
         )}
       </div>
