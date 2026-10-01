@@ -65,7 +65,7 @@ export default function TeacherDashboard() {
   const handleCreateSession = async (event) => {
     event.preventDefault();
     if (!sessionName.trim() || selectedPlatforms.length === 0) return;
-    if (selectedPlatforms.some((platform) => platform.name === 'Kahoot') && !/^\\d+$/.test(kahootCode.trim())) return;
+    if (selectedPlatforms.some((platform) => platform.name === 'Kahoot') && !/^\d+$/.test(kahootCode.trim())) return;
     setLoading(true);
     try {
       const cookie = getTeacherCookie();
