@@ -20,6 +20,7 @@ export default function TeacherDashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sessionName, setSessionName] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [kahootCode, setKahootCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [teacherEmail, setTeacherEmail] = useState('');
   const [selectedSession, setSelectedSession] = useState(null);
@@ -64,6 +65,7 @@ export default function TeacherDashboard() {
   const handleCreateSession = async (event) => {
     event.preventDefault();
     if (!sessionName.trim() || selectedPlatforms.length === 0) return;
+    if (selectedPlatforms.some((platform) => platform.name === 'Kahoot') && !/^\\d+$/.test(kahootCode.trim())) return;
     setLoading(true);
     try {
       const cookie = getTeacherCookie();
@@ -72,6 +74,7 @@ export default function TeacherDashboard() {
         platforms: selectedPlatforms.map((platform) => platform.name),
         platform: selectedPlatforms[0].name,
         platformUrls: Object.fromEntries(selectedPlatforms.map((platform) => [platform.name, platform.url])),
+        ...(selectedPlatforms.some((platform) => platform.name === 'Kahoot') ? { kahootCode: kahootCode.trim() } : {}),
         code: generateSessionCode(),
         accessCode: generateAccessCode(),
         createdAt: new Date().toISOString(),
@@ -82,6 +85,7 @@ export default function TeacherDashboard() {
       });
       setSessionName('');
       setSelectedPlatforms([]);
+      setKahootCode('');
       setShowCreateModal(false);
     } finally {
       setLoading(false);
@@ -130,7 +134,7 @@ export default function TeacherDashboard() {
         </div>
       </main>
 
-      {showCreateModal && <div className={styles.modal}><form className={styles.modalContent} onSubmit={handleCreateSession}><h2>Create a new session</h2><label>Session name<input autoFocus value={sessionName} onChange={(event) => setSessionName(event.target.value)} className={styles.input} placeholder="Period 2 math review" required /></label><fieldset><legend>Choose testing tools</legend>{TESTING_PLATFORMS.map((platform) => <label key={platform.name} className={styles.checkbox}><input type="checkbox" checked={selectedPlatforms.includes(platform)} onChange={() => togglePlatform(platform)} />{platform.name}</label>)}</fieldset><div className={styles.modalButtons}><button type="submit" disabled={loading || selectedPlatforms.length === 0} className={styles.primaryBtn}>{loading ? 'Creating...' : 'Create session'}</button><button type="button" onClick={() => setShowCreateModal(false)} className={styles.secondaryBtn}>Cancel</button></div></form></div>}
+      {showCreateModal && <div className={styles.modal}><form className={styles.modalContent} onSubmit={handleCreateSession}><h2>Create a new session</h2><label>Session name<input autoFocus value={sessionName} onChange={(event) => setSessionName(event.target.value)} className={styles.input} placeholder="Period 2 math review" required /></label><fieldset><legend>Choose testing tools</legend>{TESTING_PLATFORMS.map((platform) => <label key={platform.name} className={styles.checkbox}><input type="checkbox" checked={selectedPlatforms.includes(platform)} onChange={() => togglePlatform(platform)} />{platform.name}</label>)}</fieldset>{selectedPlatforms.some((platform) => platform.name === 'Kahoot') && <label>Kahoot join code<input className={styles.input} inputMode="numeric" pattern="[0-9]+" value={kahootCode} onChange={(event) => setKahootCode(event.target.value.replace(/[^0-9]/g, ''))} placeholder="Enter the Kahoot PIN" required /></label>}<div className={styles.modalButtons}><button type="submit" disabled={loading || selectedPlatforms.length === 0} className={styles.primaryBtn}>{loading ? 'Creating...' : 'Create session'}</button><button type="button" onClick={() => setShowCreateModal(false)} className={styles.secondaryBtn}>Cancel</button></div></form></div>}
 
       {selectedSession && <div className={styles.modal}><section className={styles.sessionControlPanel}><button className={styles.closeBtn} onClick={() => setSelectedSession(null)} aria-label="Close session controls">×</button><h2>{selectedSession.name}</h2><p>Share this code with students</p><div className={styles.code}>{selectedSession.code}</div><p>Teacher access code</p><div className={styles.code}>{selectedSession.accessCode || 'Set on session creation'}</div><div className={styles.controlButtons}>{sessionPaused ? <button onClick={() => updateSelectedSession({ paused: false })} className={styles.resumeBtn}>Resume all</button> : <button onClick={() => updateSelectedSession({ paused: true })} className={styles.pauseBtn}>Pause all</button>}<button onClick={handleStopSession} className={styles.stopBtn}>Stop session</button></div><div className={styles.studentList}><h3>Students in session ({sessionStudents.length})</h3>{sessionStudents.length === 0 ? <p className={styles.empty}>Students will appear here after they join.</p> : sessionStudents.map((student) => <div key={student.id} className={styles.studentItem}><span>{student.name}</span><button onClick={() => update(ref(database, `teachers/${getTeacherCookie().uid}/sessions/${selectedSession.id}/students/${student.id}`), { paused: !student.paused })} className={styles.pauseStudentBtn}>{student.paused ? 'Resume' : 'Pause'}</button></div>)}</div></section></div>}
     </div>

@@ -33,7 +33,10 @@ export default function StudentSession() {
         setSessionPaused(Boolean(session.paused));
         const assignedPlatform = session.platforms?.[0] || session.platform;
         const assignedUrl = session.platformUrls?.[assignedPlatform] || session.testUrl || '';
-        setTestUrl(assignedUrl ? (assignedUrl.startsWith('http') ? assignedUrl : `https://${assignedUrl}`) : 'about:blank');
+        const normalizedUrl = assignedUrl ? (assignedUrl.startsWith('http') ? assignedUrl : `https://${assignedUrl}`) : 'about:blank';
+        setTestUrl(assignedPlatform === 'Kahoot' && session.kahootCode
+          ? `https://kahoot.it/?pin=${encodeURIComponent(session.kahootCode)}`
+          : normalizedUrl);
 
         if (session.status === 'closed') {
           setSessionClosed(true);
@@ -151,33 +154,23 @@ export default function StudentSession() {
     return <div className={styles.pauseOverlay}><div className={styles.pauseMessage}><h2>This session has closed</h2><p>Please close this tab.</p></div></div>;
   }
 
-  if (fullscreenViolation) {
-    return (
-      <div className={styles.pauseOverlay}>
-        <div className={styles.pauseMessage}>
-          <h2>You&apos;ve been caught</h2>
-          <p>You left fullscreen. Ask your teacher for the 3-digit access code to resume your test.</p>
-          <form onSubmit={handleAccessCodeSubmit} className={styles.accessForm}>
-            <label className="sr-only" htmlFor="access-code">Teacher access code</label>
-            <input id="access-code" inputMode="numeric" pattern="[0-9]{3}" maxLength="3" value={accessCode} onChange={(event) => setAccessCode(event.target.value.replace(/\\D/g, '').slice(0, 3))} className={styles.accessInput} placeholder="000" required />
-            <button type="submit" className={styles.accessButton}>Resume</button>
-          </form>
-          {accessError && <p className={styles.accessError}>{accessError}</p>}
-        </div>
-      </div>
-    );
-  }
-
-  if (sessionPaused || studentPaused) {
-    return (
-      <div className={styles.pauseOverlay}>
-        <div className={styles.pauseMessage}>
-          <h2>⏸ The Session Has Been Paused</h2>
-          <p>Please wait for your teacher to resume the session.</p>
-        </div>
-      </div>
-    );
-  }
+  const lockedMessage = fullscreenViolation ? (
+    <div className={styles.pauseMessage}>
+      <h2>You&apos;ve been caught</h2>
+      <p>You left fullscreen. Ask your teacher for the 3-digit access code to resume your test.</p>
+      <form onSubmit={handleAccessCodeSubmit} className={styles.accessForm}>
+        <label className="sr-only" htmlFor="access-code">Teacher access code</label>
+        <input id="access-code" inputMode="numeric" pattern="[0-9]{3}" maxLength="3" value={accessCode} onChange={(event) => setAccessCode(event.target.value.replace(/[^0-9]/g, '').slice(0, 3))} className={styles.accessInput} placeholder="000" required />
+        <button type="submit" className={styles.accessButton}>Resume</button>
+      </form>
+      {accessError && <p className={styles.accessError}>{accessError}</p>}
+    </div>
+  ) : (
+    <div className={styles.pauseMessage}>
+      <h2>The Session Has Been Paused</h2>
+      <p>Please wait for your teacher to resume the session.</p>
+    </div>
+  );
 
   if (!sessionStarted) {
     return (
@@ -214,27 +207,35 @@ export default function StudentSession() {
         </button>
       </div>
 
-      {fullscreen ? (
-        <div className={styles.fullscreenOverlay}>
-          <iframe
-            src={testUrl}
-            className={styles.iframe}
-            title="Assigned testing platform"
-            allowFullScreen
-          />
-          <div className={styles.testActions}>
-            <button onClick={handleExitFullscreen} className={styles.exitFullscreenBtn}>
-              Exit fullscreen
-            </button>
+      <div className={styles.testContainer}>
+        <p>Your assigned test is ready.</p>
+        <button onClick={handleEnterFullscreen} className={styles.fullscreenBtn}>Open assigned test</button>
+      </div>
+      <div className={styles.fullscreenOverlay}>
+        <iframe
+          src={testUrl}
+          className={styles.iframe}
+          title="Assigned testing platform"
+          allowFullScreen
+          tabIndex={fullscreenViolation || sessionPaused || studentPaused || !fullscreen ? -1 : 0}
+          aria-hidden={fullscreenViolation || sessionPaused || studentPaused || !fullscreen}
+        />
+        <div className={styles.testActions}>
+          <button onClick={handleExitFullscreen} className={styles.exitFullscreenBtn}>
+            Exit fullscreen
+          </button>
+        </div>
+        {(!fullscreen || fullscreenViolation || sessionPaused || studentPaused) && (
+          <div className={styles.iframeLockOverlay} role="dialog" aria-modal="true">
+            {fullscreenViolation ? lockedMessage : !fullscreen ? (
+              <div className={styles.pauseMessage}>
+                <h2>Your assigned test is ready</h2>
+                <p>Select Open assigned test to begin.</p>
+              </div>
+            ) : lockedMessage}
           </div>
-        </div>
-      ) : (
-        <div className={styles.testContainer}>
-          <p>Your assigned test is ready.</p>
-          <button onClick={handleEnterFullscreen} className={styles.fullscreenBtn}>Open assigned test</button>
-
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

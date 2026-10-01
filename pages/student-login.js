@@ -15,6 +15,11 @@ export default function StudentLogin() {
   const handleJoinSession = async (e) => {
     e.preventDefault();
     setError('');
+    const safeStudentName = studentName.replace(/[\\p{Extended_Pictographic}\\uFE0F\\u200D]/gu, '').replace(/\\s+/g, ' ').trim();
+    if (!safeStudentName) {
+      setError('Please enter a nickname without emojis.');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -62,7 +67,7 @@ export default function StudentLogin() {
 
       // Add student to session
       const studentData = {
-        name: studentName,
+        name: safeStudentName,
         joinedAt: new Date().toISOString(),
         paused: false,
         canDraw: true
@@ -96,7 +101,7 @@ export default function StudentLogin() {
               type="text"
               placeholder="Enter your name"
               value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
+              onChange={(e) => setStudentName(e.target.value.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, ''))}
               className={styles.input}
               required
             />

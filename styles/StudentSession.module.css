@@ -179,6 +179,16 @@
   border: none;
 }
 
+.iframeLockOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+}
+
 .testActions {
   position: absolute;
   top: 20px;
