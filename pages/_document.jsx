@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Moxee - Secure Testing Platform</title>
+        <title>Moxxe - Secure Testing Platform</title>
       </Head>
       <body>
         <Main />

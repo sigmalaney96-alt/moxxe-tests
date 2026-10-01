@@ -4,7 +4,7 @@ export default function ExitTest() {
   return (
     <div className={styles.page}>
       <header className={styles.topBar}>
-        <div className={styles.brand}>Moxee</div>
+        <div className={styles.brand}>Moxxe</div>
       </header>
 
       <section className={styles.hero}>
@@ -13,7 +13,7 @@ export default function ExitTest() {
 
       <section className={styles.infoPanel}>
         <p className={styles.infoText}>
-          Hi You have exited the Test Session with Moxee, If you accidentally pressed escape or F11 please go tell a teacher to help you reconnect!
+          Hi You have exited the Test Session with Moxxe, If you accidentally pressed escape or F11 please go tell a teacher to help you reconnect!
         </p>
       </section>
     </div>

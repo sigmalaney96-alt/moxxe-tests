@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <h1>Moxee - Secure Testing Platform</h1>
+        <h1>Moxxe - Secure Testing Platform</h1>
         <p>Take tests securely with real-time monitoring</p>
 
         <div className={styles.buttonContainer}>
@@ -33,9 +33,9 @@ export default function Home() {
         </div>
 
         <div className={styles.infoContainer}>
-          <h2>About Moxee</h2>
+          <h2>About Moxxe</h2>
           <p>
-            Moxee is a secure testing platform that ensures academic integrity by monitoring 
+            Moxxe is a secure testing platform that ensures academic integrity by monitoring 
             student activity during assessments. Teachers can manage sessions, pause tests, 
             and monitor multiple students in real-time.
           </p>

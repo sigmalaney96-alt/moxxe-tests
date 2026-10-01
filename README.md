@@ -1,6 +1,6 @@
-# Moxee - Secure Testing Platform
+# Moxxe - Secure Testing Platform
 
-Moxee is a tool for taking tests on Cambium Assessments that opens the test in a secure window. If you exit and try to cheat, the test will pause!
+Moxxe is a tool for taking tests on Cambium Assessments that opens the test in a secure window. If you exit and try to cheat, the test will pause!
 
 ## Getting Started
 
@@ -21,7 +21,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Pages
 
 - **Home** (`/`) - Welcome page with navigation
-- **About** (`/about`) - Information about Moxee
+- **About** (`/about`) - Information about Moxxe
 - **Test** (`/test`) - Secure testing interface with fullscreen mode
 - **Exit Test** (`/exitTest`) - Page displayed when exiting fullscreen
 

@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h1 className={styles.title}>Moxee</h1>
+        <h1 className={styles.title}>Moxxe</h1>
         <p className={styles.subtitle}>Secure Testing Made Simple</p>
         
         <div className={styles.buttonContainer}>
