@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { database, auth } from '../lib/firebase';
-import { onValue, push, ref, update } from 'firebase/database';
+import { get, onValue, push, ref, remove, update } from 'firebase/database';
 import { signOut } from 'firebase/auth';
 import { getTeacherCookie, generateSessionCode, isTeacherLoggedIn, removeTeacherCookie } from '../lib/sessionUtils';
 import styles from '../styles/Dashboard.module.css';
@@ -38,7 +38,19 @@ export default function TeacherDashboard() {
     const sessionsRef = ref(database, `teachers/${cookie.uid}/sessions`);
     return onValue(sessionsRef, (snapshot) => {
       const data = snapshot.val() || {};
-      setSessions(Object.entries(data).map(([id, session]) => ({ id, ...session }))
+      const entries = Object.entries(data);
+      const pastSessions = entries
+        .filter(([, session]) => session.status === 'closed')
+        .sort(([, a], [, b]) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+      if (pastSessions.length > 2) {
+        pastSessions.slice(0, pastSessions.length - 2).forEach(([sessionId]) => {
+          remove(ref(database, `teachers/${cookie.uid}/sessions/${sessionId}`));
+        });
+      }
+
+      setSessions(entries.map(([id, session]) => ({ id, ...session }))
+        .filter((session) => !pastSessions.slice(0, Math.max(0, pastSessions.length - 2)).some(([id]) => id === session.id))
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     });
   }, [router]);
